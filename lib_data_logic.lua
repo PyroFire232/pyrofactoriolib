@@ -481,7 +481,14 @@ function logic.InitScanCraftCats() -- Push hand-crafting categories
 	end
 end
 function logic.InitScanResourceCats() -- Push the hand-minable resource category
-	logic.PushResourceCat("basic-solid",0)
+	for n,v in pairs(data.raw.character) do
+		if v.mining_categories then
+			local rc = v.mining_categories
+			for k, x in pairs(rc) do 
+				logic.PushResourceCat(x, 0) 
+			end
+		end
+	end
 end
 function logic.InitScanRecipes() -- Push recipes that are enabled/unlocked from the start
 	for n,v in pairs(data.raw.recipe)do if((not proto.IsDisabled(v)) or hand.recipes[v.name])then logic.PushRecipe(v) end end --if(hand.craft_cats[v.category or "crafting"])then push() end
