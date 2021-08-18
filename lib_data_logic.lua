@@ -308,7 +308,7 @@ function logic.PushFuelCat(c,n) if(not hand.burner_cats[c] or (n and hand.burner
 function logic.PushResourceCat(c,n) if(not hand.resource_cats[c] or (n and hand.resource_cats[c]<n))then hand.resource_cats[c]=n or 0 logic.HandChanged("resource_cats",c,n) end end
 function logic.PushLabPack(c) local n=proto.Name(c) if(not hand.labpacks[n])then hand.labpacks[n]=c logic.HandChanged("labpacks",c) end end
 function logic.PushLabSlot(n) if(not hand.labslots[n])then hand.labslots[n]=true logic.HandChanged("labslots",n) end end
-function logic.PushItem(c,x,s) local n=proto.Name(c) if(not hand.items[n])then hand.items[n]=x or 0 if(s)then logic.ScanItem(c) end logic.HandChanged("item",c,x,s) end end
+function logic.PushItem(c,x,s) local n=proto.Name(c) if(not hand.items[n] or (x and hand.items[n]<x))then hand.items[n]=x or 0 if(s)then logic.ScanItem(c) end logic.HandChanged("item",c,x,s) end end
 
 function logic.PushHeat(buffer) if(hand.heat<buffer.max_temperature)then hand.heat=buffer.max_temperature logic.HandChanged("heat",buffer) end end
 function logic.PushBurner(fuel) local iv=fuel.burnt_inventory_size for k,v in pairs(proto.FuelCategories(fuel))do logic.PushFuelCat(v,iv) end end
@@ -481,7 +481,14 @@ function logic.InitScanCraftCats() -- Push hand-crafting categories
 	end
 end
 function logic.InitScanResourceCats() -- Push the hand-minable resource category
-	logic.PushResourceCat("basic-solid",0)
+	for n,v in pairs(data.raw.character) do
+		if v.mining_categories then
+			local rc = v.mining_categories
+			for k, x in pairs(rc) do 
+				logic.PushResourceCat(x, 0) 
+			end
+		end
+	end
 end
 function logic.InitScanRecipes() -- Push recipes that are enabled/unlocked from the start
 	for n,v in pairs(data.raw.recipe)do if((not proto.IsDisabled(v)) or hand.recipes[v.name])then logic.PushRecipe(v) end end --if(hand.craft_cats[v.category or "crafting"])then push() end
